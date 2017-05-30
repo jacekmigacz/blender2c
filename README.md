@@ -4,6 +4,12 @@ Extracts tessfaces and triangulate quads on the 1st and 3rd vertices.
 
 Forms the pair of arrays with vertices and indicies for each mesh.
 
+Usage
+=====
+```
+blender infile.blend -b -P export_c.py [-- -o outfile.h]
+```
+
 Example
 =======
 Flat Cube
