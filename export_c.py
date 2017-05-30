@@ -11,12 +11,12 @@ bl_info = {
     'category': "Import-Export"
 }
 
-import sys, os
+import getopt, os, sys
 import bpy
 from bpy.props import StringProperty
 from bpy_extras.io_utils import ExportHelper
 
-indent = "     "
+indent = "    "
 
 class Export_C(bpy.types.Operator, ExportHelper):
     bl_idname = "export_scene.c"
@@ -32,10 +32,13 @@ class Export_C(bpy.types.Operator, ExportHelper):
         ctx = bpy.context
         sc = ctx.scene
 
-        basename = bpy.path.basename(bpy.context.blend_data.filepath)
-        basename = os.path.splitext(basename)[0]
+        self.parse_args()
+        if self.outfile == "":
+            basename = bpy.path.basename(bpy.context.blend_data.filepath)
+            basename = os.path.splitext(basename)[0]
+            self.outfile = "{0}.h".format(basename)
 
-        f = open("{0}.h".format(basename), "w", encoding="utf8", newline="\n")
+        f = open(self.outfile, "w", encoding="utf8", newline="\n")
         fw = f.write
 
         objs = [obj for obj in sc.objects if obj.type == 'MESH']
@@ -88,6 +91,26 @@ class Export_C(bpy.types.Operator, ExportHelper):
 
         f.close()
         return {'FINISHED'}
+
+    def parse_args(self):
+        self.outfile = ""
+
+        if ("--" in sys.argv) == False:
+            return
+
+        pos = sys.argv.index("--")
+        pos += 1
+        args = sys.argv[pos:]
+
+        try:
+            opts, args = getopt.getopt(args, 'o:', ["outfile="])
+        except getopt.GetoptError as err:
+            print(err)
+            return
+
+        for opt, arg in opts:
+            if (opt in ("-o", "--outfile")):
+                self.outfile = arg
 
 def create_menu(self, context):
     self.layout.operator(Export_c.bl_idname, text="C header for OpenGL ES (.h)")
